@@ -28,6 +28,9 @@ jobs:
       id: setup
       run: date -u "+date=%FT%T" >>"$GITHUB_OUTPUT"
 
+    - name: "Install dependencies"
+      run: sudo apt-get update && sudo apt-get install libxml2-utils eslint ghostscript enscript -y
+
     - name: "Caching"
       uses: actions/cache@v4
       with:
