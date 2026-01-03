@@ -1,7 +1,7 @@
 ---
 title: Secure Mobile Vault Format
 abbrev: SMVF
-docname: draft-voyager-svm-specification-latest
+docname: draft-voyager-smv-specification-latest
 category: info
 
 ipr: trust200902
@@ -19,6 +19,11 @@ author:
 
 normative:
   RFC2119:
+  RFC4106:   # AES-GCM
+  RFC8439:   # ChaCha20-Poly1305
+  RFC9106:   # Argon2
+  RFC7914:   # scrypt
+  RFC3339:   # Timestamps (instead of ISO 8601)
 
 informative:
 
@@ -190,8 +195,8 @@ Before encryption, the vault payload is serialized as UTF-8 encoded JSON.
 The top-level object contains the following fields:
 
 * vault_version: Integer indicating the logical vault schema version
-* created: ISO 8601 UTC timestamp
-* updated: ISO 8601 UTC timestamp
+* created: RFC3339 timestamp
+* updated: RFC3339 timestamp
 * entries: Array of vault entries
 * metadata: Optional application-defined metadata
 
@@ -205,8 +210,8 @@ Each vault entry is a JSON object containing the following fields:
 * fields: Key-value mapping of entry fields
 * notes: Optional freeform text
 * tags: Optional array of strings
-* created: ISO 8601 UTC timestamp
-* updated: ISO 8601 UTC timestamp
+* created: RFC3339 timestamp
+* updated: RFC3339 timestamp
 
 The type field allows future extension to support non-password secrets.
 
@@ -275,11 +280,15 @@ The format does not mitigate:
 * Active runtime memory attacks
 * Screen capture malware
 
-# Rationale and ZXTX Lineage
+# Security Considerations
 
-SMVF adopts ZXTX-style design principles including structured sections, explicit cryptographic framing, metadata authentication, and specification-first development.
+This document specifies a cryptographic container format intended to protect sensitive data at rest. Security properties and assumptions are discussed throughout the document, including key derivation, authenticated encryption, and memory handling requirements.
 
-The format simplifies ZXTX concepts to better suit mobile constraints and usability requirements.
+The format assumes a trusted execution environment and does not protect against compromised operating systems, runtime memory disclosure, or malicious software with sufficient privileges. Implementers are responsible for selecting appropriate cryptographic parameters and ensuring correct use of underlying cryptographic primitives.
+
+# IANA Considerations
+
+This document has no IANA actions.
 
 # References
 
