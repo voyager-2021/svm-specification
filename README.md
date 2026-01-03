@@ -1,8 +1,8 @@
 <!-- regenerate: on (set to off if you edit this file) -->
 
-# Secure Mobile Vault Format (SMVF)
+# Secure Mobile Vault Format
 
-This is the working area for the individual Internet-Draft, "Secure Mobile Vault Format (SMVF)".
+This is the working area for the individual Internet-Draft, "Secure Mobile Vault Format".
 
 * [Editor's Copy](https://voyager-2021.github.io/svm-specification/#go.draft-voyager-svm-specification.html)
 * [Datatracker Page](https://datatracker.ietf.org/doc/draft-voyager-svm-specification)
