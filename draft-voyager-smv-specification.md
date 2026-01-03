@@ -16,9 +16,10 @@ author:
   -
     name: Ohto Keskilammi
     email: voyager-2019@outlook.com
+    organization: Self-published
 
 normative:
-  RFC2119:
+  RFC2119:   # Boilerplate
   RFC4106:   # AES-GCM
   RFC8439:   # ChaCha20-Poly1305
   RFC9106:   # Argon2
@@ -26,6 +27,10 @@ normative:
   RFC3339:   # Timestamps (instead of ISO 8601)
 
 informative:
+  RFC9562:   # UUID format
+  RFC8259:   # JSON standard
+
+date: 2026-01-03
 
 --- abstract
 
@@ -33,13 +38,40 @@ The Secure Mobile Vault Format (SMVF) defines a binary container format for stor
 
 --- middle
 
+# Status of This Memo
+
+This Internet-Draft is submitted in full conformance with the
+provisions of BCP 78 and BCP 79.
+
+Internet-Drafts are working documents of the Internet Engineering
+Task Force (IETF).  Note that other groups may also distribute
+working documents as Internet-Drafts.
+
+Internet-Drafts are draft documents valid for a maximum of six months
+and may be updated, replaced, or obsoleted by other documents at any
+time.  It is inappropriate to use Internet-Drafts as reference
+material or to cite them other than as "work in progress".
+
+# Copyright Notice
+
+Copyright (c) 2026 IETF Trust and the persons identified as the
+document authors.  All rights reserved.
+
+This document is subject to BCP 78 and the IETF Trust's Legal
+Provisions Relating to IETF Documents.
+
 # Introduction
 
 The Secure Mobile Vault Format (SMVF) defines a binary container format for storing encrypted password vaults on mobile devices. The format is designed to be offline-first, zero-knowledge, cryptographically robust, and forward-compatible.
 
-SMVF follows ZXTX-style principles including explicit headers, typed sections, cryptographic framing, and strict versioning, while remaining minimal and suitable for mobile environments.
+SMVF follows strict principles including explicit headers, typed sections, cryptographic framing, and strict versioning, while remaining minimal and suitable for mobile environments.
 
-The key words MUST, MUST NOT, REQUIRED, SHOULD, SHOULD NOT, and MAY in this document are to be interpreted as described in RFC 2119.
+# Requirements Language
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL
+      NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and
+      "OPTIONAL" in this document are to be interpreted as described in
+      [RFC2119].
 
 # Design Goals
 
@@ -82,19 +114,19 @@ The header contains the following fields:
   Indicates backward-compatible revisions.
 
 * Header Length (4 octets)
-  Total length in octets of the header plus all mandatory sections preceding the encrypted payload.
+  Total length in octets of all sections except the Encrypted Vault Section length preceding the encrypted payload.
 
 * Flags (4 octets)
   Bitmask defining file properties.
 
 * File UUID (16 octets)
-  Randomly generated unique identifier. This value is non-secret and MUST NOT be reused.
+  Randomly generated UUID version 4 identifier as defined in [RFC9562]. This value is non-secret and MUST NOT be reused.
 
 The following header flags are defined:
 
 * Bit 0: Encrypted payload present (MUST be set)
 * Bit 1: Footer present
-* Bits 2–31: Reserved and MUST be zero
+* Bits 2-31: Reserved and MUST be zero
 
 # Section Model
 {: #sec-model }
@@ -109,17 +141,17 @@ Each section consists of:
 
 The section length specifies the length of the section value only.
 
-Unknown section types MUST be skipped using the length field. The section order defined in this specification MUST be preserved for version 1.0.
+Unknown section types MUST be skipped using the length field. The section order defined in this specification MUST be preserved.
 
 # Section Types
 {: #sec-types }
 
 The following section types are defined:
 
-* 0x01: KDF Parameters Section (REQUIRED)
-* 0x02: Crypto Parameters Section (REQUIRED)
-* 0x03: Encrypted Vault Section (REQUIRED)
-* 0x7F: Reserved for future use
+* 0x0001: KDF Parameters Section (REQUIRED)
+* 0x0002: Crypto Parameters Section (REQUIRED)
+* 0x0003: Encrypted Vault Section (REQUIRED)
+* 0x0004-0x7FFF: Reserved for future use and MUST NOT be used
 
 No section identifier may be reused for a different purpose.
 
@@ -138,8 +170,9 @@ The section value contains the following fields:
 
 The following KDF Algorithm identifiers are defined:
 
-* 0x01: Argon2id
-* 0x02: scrypt
+* 0x01: Argon2id as defined in [RFC9106]
+* 0x02: scrypt as defined in [RFC7914]
+* 0x03-0x7F: Reserved for future use and MUST NOT be used
 
 The salt is not secret and MUST be generated randomly per vault.
 
@@ -171,10 +204,13 @@ The section value contains the following fields:
 
 The following Cipher Algorithm identifiers are defined:
 
-* 0x01: AES-256-GCM
-* 0x02: ChaCha20-Poly1305
+* 0x01: AES-256-GCM as defined in [RFC4106]
+* 0x02: ChaCha20-Poly1305 as defined in [RFC8439]
+* 0x03-0x7F: Reserved for future use and MUST NOT be used
 
-The nonce MUST be generated randomly per vault file. The authentication tag is embedded in the AEAD ciphertext and is not stored separately.
+For AES-256-GCM and ChaCha20-Poly1305, the Key Length MUST be 32 octets.
+
+Implementations MUST ensure that a nonce is never reused with the same derived key. The authentication tag is embedded in the AEAD ciphertext and is not stored separately.
 
 # Encrypted Vault Section
 
@@ -188,30 +224,34 @@ The payload is produced using an AEAD construction with the following inputs:
 
 All metadata is authenticated but not encrypted. Any modification to these components MUST cause decryption failure.
 
+The AAD input MUST be the exact serialized octet sequence of the File Header followed by the serialized KDF Parameters Section and the serialized Crypto Parameters Section, in file order.
+
 # Vault Payload Structure
 
-Before encryption, the vault payload is serialized as UTF-8 encoded JSON.
+Before encryption, the vault payload is serialized JSON as defined in [RFC8259]. All JSON strings MUST be encoded in UTF-8.
+
+No canonicalization of the JSON payload is required, as integrity is provided by the enclosing AEAD construction.
 
 The top-level object contains the following fields:
 
 * vault_version: Integer indicating the logical vault schema version
-* created: RFC3339 timestamp
-* updated: RFC3339 timestamp
+* created: [RFC3339] timestamp
+* updated: [RFC3339] timestamp
 * entries: Array of vault entries
 * metadata: Optional application-defined metadata
 
 # Vault Entry Structure
 
-Each vault entry is a JSON object containing the following fields:
+Each vault entry is a [RFC8259] JSON object containing the following fields:
 
-* id: UUID version 4 string
+* id: UUID version 4 string as defined in [RFC9562]
 * type: Entry type identifier
 * title: Human-readable name
 * fields: Key-value mapping of entry fields
 * notes: Optional freeform text
 * tags: Optional array of strings
-* created: RFC3339 timestamp
-* updated: RFC3339 timestamp
+* created: [RFC3339] timestamp
+* updated: [RFC3339] timestamp
 
 The type field allows future extension to support non-password secrets.
 
@@ -225,7 +265,7 @@ The following properties are provided:
 * Integrity of vault contents
 * Integrity and authenticity of metadata
 
-No separate MAC or digital signature is required in version 1.0.
+No separate MAC or digital signature is required.
 
 # Atomic Update Requirements
 
@@ -280,28 +320,23 @@ The format does not mitigate:
 * Active runtime memory attacks
 * Screen capture malware
 
+# IANA Considerations
+
+This document has no IANA actions.
+
 # Security Considerations
 
 This document specifies a cryptographic container format intended to protect sensitive data at rest. Security properties and assumptions are discussed throughout the document, including key derivation, authenticated encryption, and memory handling requirements.
 
 The format assumes a trusted execution environment and does not protect against compromised operating systems, runtime memory disclosure, or malicious software with sufficient privileges. Implementers are responsible for selecting appropriate cryptographic parameters and ensuring correct use of underlying cryptographic primitives.
 
-# IANA Considerations
-
-This document has no IANA actions.
-
-# References
-
-## Normative References
-
-[RFC2119] Bradner, S., "Key words for use in RFCs to Indicate Requirement Levels", BCP 14, RFC 2119.
-
-## Informative References
-
-
 --- back
 
 # Acknowledgments
 {:numbered="false"}
 
-TODO acknowledge.
+# Authors' Addresses
+{:numbered="false"}
+
+Ohto Keskilammi
+Email: voyager-2019@outlook.com
