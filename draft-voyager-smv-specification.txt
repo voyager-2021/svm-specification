@@ -9,7 +9,7 @@ Expires: 7 July 2026
 
 
                        Secure Mobile Vault Format
-                 draft-voyager-svm-specification-latest
+                 draft-voyager-smv-specification-latest
 
 Abstract
 
@@ -25,7 +25,7 @@ Discussion Venues
    This note is to be removed before publishing as an RFC.
 
    Source for this draft and an issue tracker can be found at
-   https://github.com/voyager-2021/svm-specification.
+   https://github.com/voyager-2021/smv-specification.
 
 Status of This Memo
 
@@ -77,11 +77,12 @@ Table of Contents
    15. Forward Compatibility Rules
    16. Explicit Non-Goals
    17. Threat Model Summary
-   18. Rationale and ZXTX Lineage
-   19. References
-     19.1.  Normative References
-     19.2.  Informative References
-   20. Normative References
+   18. Security Considerations
+   19. IANA Considerations
+   20. References
+     20.1.  Normative References
+     20.2.  Informative References
+   21. Normative References
    Acknowledgments
    Author's Address
 
@@ -298,9 +299,9 @@ Table of Contents
 
    *  vault_version: Integer indicating the logical vault schema version
 
-   *  created: ISO 8601 UTC timestamp
+   *  created: RFC3339 timestamp
 
-   *  updated: ISO 8601 UTC timestamp
+   *  updated: RFC3339 timestamp
 
    *  entries: Array of vault entries
 
@@ -322,9 +323,9 @@ Table of Contents
 
    *  tags: Optional array of strings
 
-   *  created: ISO 8601 UTC timestamp
+   *  created: RFC3339 timestamp
 
-   *  updated: ISO 8601 UTC timestamp
+   *  updated: RFC3339 timestamp
 
    The type field allows future extension to support non-password
    secrets.
@@ -413,30 +414,62 @@ Table of Contents
 
    *  Screen capture malware
 
-18.  Rationale and ZXTX Lineage
+18.  Security Considerations
 
-   SMVF adopts ZXTX-style design principles including structured
-   sections, explicit cryptographic framing, metadata authentication,
-   and specification-first development.
+   This document specifies a cryptographic container format intended to
+   protect sensitive data at rest.  Security properties and assumptions
+   are discussed throughout the document, including key derivation,
+   authenticated encryption, and memory handling requirements.
 
-   The format simplifies ZXTX concepts to better suit mobile constraints
-   and usability requirements.
+   The format assumes a trusted execution environment and does not
+   protect against compromised operating systems, runtime memory
+   disclosure, or malicious software with sufficient privileges.
+   Implementers are responsible for selecting appropriate cryptographic
+   parameters and ensuring correct use of underlying cryptographic
+   primitives.
 
-19.  References
+19.  IANA Considerations
 
-19.1.  Normative References
+   This document has no IANA actions.
+
+20.  References
+
+20.1.  Normative References
 
    [RFC2119] Bradner, S., "Key words for use in RFCs to Indicate
    Requirement Levels", BCP 14, RFC 2119.
 
-19.2.  Informative References
+20.2.  Informative References
 
-20.  Normative References
+21.  Normative References
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
               DOI 10.17487/RFC2119, March 1997,
               <https://www.rfc-editor.org/rfc/rfc2119>.
+
+   [RFC3339]  Klyne, G. and C. Newman, "Date and Time on the Internet:
+              Timestamps", RFC 3339, DOI 10.17487/RFC3339, July 2002,
+              <https://www.rfc-editor.org/rfc/rfc3339>.
+
+   [RFC4106]  Viega, J. and D. McGrew, "The Use of Galois/Counter Mode
+              (GCM) in IPsec Encapsulating Security Payload (ESP)",
+              RFC 4106, DOI 10.17487/RFC4106, June 2005,
+              <https://www.rfc-editor.org/rfc/rfc4106>.
+
+   [RFC7914]  Percival, C. and S. Josefsson, "The scrypt Password-Based
+              Key Derivation Function", RFC 7914, DOI 10.17487/RFC7914,
+              August 2016, <https://www.rfc-editor.org/rfc/rfc7914>.
+
+   [RFC8439]  Nir, Y. and A. Langley, "ChaCha20 and Poly1305 for IETF
+              Protocols", RFC 8439, DOI 10.17487/RFC8439, June 2018,
+              <https://www.rfc-editor.org/rfc/rfc8439>.
+
+   [RFC9106]  Biryukov, A., Dinu, D., Khovratovich, D., and S.
+              Josefsson, "Argon2 Memory-Hard Function for Password
+              Hashing and Proof-of-Work Applications", RFC 9106,
+              DOI 10.17487/RFC9106, September 2021,
+              <https://www.rfc-editor.org/rfc/rfc9106>.
 
 Acknowledgments
 
