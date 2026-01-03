@@ -8,7 +8,6 @@
 .tags
 /*-[0-9][0-9].xml
 /.*.mk
-/.bundle/
 /.gems/
 /.idea/
 /.refcache
@@ -20,8 +19,6 @@
 Gemfile.lock
 archive.json
 draft-voyager-smv-specification.xml
-install
 package-lock.json
 report.xml
-run
 !requirements.txt
