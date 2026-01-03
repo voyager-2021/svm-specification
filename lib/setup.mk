@@ -24,7 +24,9 @@ ifneq (,$(LATEST_WARNING))
 $(error Check names: $(LATEST_WARNING))
 endif
 ifneq (,$(strip $(shell git -c core.excludesfile=$(LIBDIR)/template/.gitignore status -s --porcelain 2>/dev/null | grep -v '^.. $(LIBDIR)')))
+ifneq (true,$(FORCE_RUN_SETUP))
 $(error You have uncommitted changes or untracked files, please commit them before running setup)
+endif
 endif
 ifneq ($(GIT_REMOTE),$(shell git remote 2>/dev/null | grep '^$(GIT_REMOTE)$$'))
 $(error Please configure a remote called '$(GIT_REMOTE)' before running setup)
