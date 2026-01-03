@@ -1,37 +1,36 @@
 ---
 title: Secure Mobile Vault Format (SMVF)
 abbrev: SMVF
-docname: draft-smvf-specification-latest
+docname: draft-voyager-svm-specification-latest
 category: info
+
 ipr: trust200902
 area: General
-workgroup: smv-wg
+workgroup: smv
 keyword: Internet-Draft
 
 stand_alone: yes
 smart_quotes: no
-pi:
-  - toc
-  - sortrefs
-  - symrefs
+pi: [toc, sortrefs, symrefs]
 
 author:
   -
     name: Ohto Keskilammi
-    organization: smv-wg
+    organization: smv
     email: voyager-2019@outlook.com
 
 normative:
   RFC2119:
 
 informative:
----
 
-# Abstract
+--- abstract
 
 The Secure Mobile Vault Format (SMVF) defines a binary container format for storing encrypted password vaults on mobile devices. The format is designed to be offline-first, zero-knowledge, cryptographically robust, and forward-compatible. SMVF specifies strict structural layout, authenticated encryption, and deterministic metadata handling suitable for constrained mobile environments.
 
-# 1. Introduction
+--- middle
+
+# Introduction
 
 The Secure Mobile Vault Format (SMVF) defines a binary container format for storing encrypted password vaults on mobile devices. The format is designed to be offline-first, zero-knowledge, cryptographically robust, and forward-compatible.
 
@@ -39,7 +38,7 @@ SMVF follows ZXTX-style principles including explicit headers, typed sections, c
 
 The key words MUST, MUST NOT, REQUIRED, SHOULD, SHOULD NOT, and MAY in this document are to be interpreted as described in RFC 2119.
 
-# 2. Design Goals
+# Design Goals
 
 The format is designed to meet the following goals:
 
@@ -50,7 +49,7 @@ The format is designed to meet the following goals:
 5. Allow future evolution without breaking existing vaults.
 6. Remain auditable and deterministic in layout.
 
-# 3. File Overview
+# File Overview
 
 An SMVF file consists of the following components, in order:
 
@@ -64,7 +63,7 @@ All multi-octet integer fields are encoded in network byte order (big-endian). T
 
 The standard file extension is ".smvf".
 
-# 4. File Header
+# File Header
 
 The file header is a fixed-size structure of 32 octets.
 
@@ -94,7 +93,8 @@ The following header flags are defined:
 * Bit 1: Footer present
 * Bits 2–31: Reserved and MUST be zero
 
-# 5. Section Model
+# Section Model
+{: #sec-model }
 
 Sections follow a typed-length-value (TLV) model.
 
@@ -108,7 +108,8 @@ The section length specifies the length of the section value only.
 
 Unknown section types MUST be skipped using the length field. The section order defined in this specification MUST be preserved for version 1.0.
 
-# 6. Section Types
+# Section Types
+{: #sec-types }
 
 The following section types are defined:
 
@@ -119,7 +120,7 @@ The following section types are defined:
 
 No section identifier may be reused for a different purpose.
 
-# 7. KDF Parameters Section
+# KDF Parameters Section
 
 This section defines how the encryption key is derived from the master password.
 
@@ -153,7 +154,7 @@ For scrypt, the parameters are defined as follows:
 
 Implementations SHOULD tune parameters for mobile hardware while maintaining resistance to offline attacks.
 
-# 8. Crypto Parameters Section
+# Crypto Parameters Section
 
 This section defines the encryption algorithm and parameters used to protect the vault payload.
 
@@ -172,7 +173,7 @@ The following Cipher Algorithm identifiers are defined:
 
 The nonce MUST be generated randomly per vault file. The authentication tag is embedded in the AEAD ciphertext and is not stored separately.
 
-# 9. Encrypted Vault Section
+# Encrypted Vault Section
 
 This section contains the encrypted vault payload.
 
@@ -184,7 +185,7 @@ The payload is produced using an AEAD construction with the following inputs:
 
 All metadata is authenticated but not encrypted. Any modification to these components MUST cause decryption failure.
 
-# 10. Vault Payload Structure
+# Vault Payload Structure
 
 Before encryption, the vault payload is serialized as UTF-8 encoded JSON.
 
@@ -196,7 +197,7 @@ The top-level object contains the following fields:
 * entries: Array of vault entries
 * metadata: Optional application-defined metadata
 
-# 11. Vault Entry Structure
+# Vault Entry Structure
 
 Each vault entry is a JSON object containing the following fields:
 
@@ -211,7 +212,7 @@ Each vault entry is a JSON object containing the following fields:
 
 The type field allows future extension to support non-password secrets.
 
-# 12. Authentication and Integrity
+# Authentication and Integrity
 
 The format relies exclusively on AEAD for security guarantees.
 
@@ -223,7 +224,7 @@ The following properties are provided:
 
 No separate MAC or digital signature is required in version 1.0.
 
-# 13. Atomic Update Requirements
+# Atomic Update Requirements
 
 Implementations MUST perform updates atomically to prevent vault corruption.
 
@@ -236,7 +237,7 @@ A recommended procedure is as follows:
 
 Mobile operating systems guarantee atomic rename operations within the same filesystem.
 
-# 14. Memory Handling Requirements
+# Memory Handling Requirements
 
 Implementations MUST enforce the following requirements:
 
@@ -244,7 +245,7 @@ Implementations MUST enforce the following requirements:
 * Keys MUST be zeroized on lock or application backgrounding.
 * Decrypted vault data MUST reside only in memory and MUST be discarded on lock or suspension.
 
-# 15. Forward Compatibility Rules
+# Forward Compatibility Rules
 
 Readers MUST reject files with unsupported major versions.
 
@@ -252,7 +253,7 @@ Readers MUST ignore unknown section types.
 
 Writers MUST preserve section ordering and MUST NOT reuse section identifiers.
 
-# 16. Explicit Non-Goals
+# Explicit Non-Goals
 
 The format intentionally excludes:
 
@@ -262,7 +263,7 @@ The format intentionally excludes:
 * Password reuse detection
 * Replay protection
 
-# 17. Threat Model Summary
+# Threat Model Summary
 
 The format mitigates:
 
@@ -276,7 +277,7 @@ The format does not mitigate:
 * Active runtime memory attacks
 * Screen capture malware
 
-# 18. Rationale and ZXTX Lineage
+# Rationale and ZXTX Lineage
 
 SMVF adopts ZXTX-style design principles including structured sections, explicit cryptographic framing, metadata authentication, and specification-first development.
 
@@ -290,6 +291,10 @@ The format simplifies ZXTX concepts to better suit mobile constraints and usabil
 
 ## Informative References
 
-(empty)
 
----
+--- back
+
+# Acknowledgments
+{:numbered="false"}
+
+TODO acknowledge.
